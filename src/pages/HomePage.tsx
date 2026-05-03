@@ -3,26 +3,35 @@ import { AuthUser, useAuth } from "@/auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useUiStore } from "@/stores/uiStore";
 import { MenuItem, Order, Restaurant, User } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BadgeDollarSign,
   CheckCircle2,
-  ChefHat,
+  ChevronDown,
   ChevronRight,
   ClipboardList,
   Clock,
+  DollarSign,
+  Image,
+  Menu,
   Minus,
+  Pencil,
   Plus,
   ReceiptText,
+  Save,
   Search,
   Shield,
+  SlidersHorizontal,
   ShoppingBag,
   Sparkles,
   Store,
+  Tags,
   Trash2,
+  UtensilsCrossed,
   UserRound,
-  Utensils,
+  X,
 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -30,6 +39,7 @@ import { z } from "zod";
 
 type CartLine = { item: MenuItem; quantity: number };
 type OrderDraft = Record<string, CartLine>;
+type AppSection = "browse" | "cart" | "orders" | "restaurants" | "menu" | "edit" | "users";
 
 const EMPTY_RESTAURANTS: Restaurant[] = [];
 const EMPTY_ORDERS: Order[] = [];
@@ -91,6 +101,12 @@ const HomePage = () => {
   const [cart, setCart] = useState<OrderDraft>({});
   const [query, setQuery] = useState("");
   const [restaurantForm, setRestaurantForm] = useState<Partial<Restaurant>>(blankRestaurant());
+  const [activeSection, setActiveSection] = useState<AppSection>("browse");
+  const isMenuOpen = useUiStore((state) => state.isMenuOpen);
+  const setMenuOpen = useUiStore((state) => state.setMenuOpen);
+  const toggleMenu = useUiStore((state) => state.toggleMenu);
+  const [isRestaurantModalOpen, setIsRestaurantModalOpen] = useState(false);
+  const [expandedRestaurantId, setExpandedRestaurantId] = useState<string>("");
 
   const token = getAccessToken();
   const restaurantsQuery = useQuery({
@@ -147,6 +163,7 @@ const HomePage = () => {
     onSuccess: async (_, payload) => {
       toast.success(payload._id ? "Restaurant updated" : "Restaurant created");
       setRestaurantForm(blankRestaurant());
+      setIsRestaurantModalOpen(false);
       await refreshAppData();
     },
     onError: (error) => toast.error((error as Error).message),
@@ -195,9 +212,35 @@ const HomePage = () => {
     }
   }, [selectedRestaurantId, visibleRestaurants]);
 
+  useEffect(() => {
+    if (user?.role === "owner" && restaurants[0] && !restaurantForm._id) {
+      setRestaurantForm({ ...restaurants[0] });
+    }
+  }, [restaurantForm._id, restaurants, user?.role]);
+
+  useEffect(() => {
+    if (!user) return;
+    const allowedSections: Record<typeof user.role, AppSection[]> = {
+      admin: ["restaurants", "orders", "users"],
+      owner: ["restaurants", "orders", "menu", "edit"],
+      customer: ["browse", "cart", "orders"],
+    };
+    const defaults: Record<typeof user.role, AppSection> = {
+      admin: "restaurants",
+      owner: "restaurants",
+      customer: "browse",
+    };
+
+    if (!allowedSections[user.role].includes(activeSection)) {
+      setActiveSection(defaults[user.role]);
+    }
+  }, [activeSection, user]);
+
   const editRestaurant = (restaurant: Restaurant) => {
     setRestaurantForm({ ...restaurant });
     setSelectedRestaurantId(restaurant._id);
+    setExpandedRestaurantId(restaurant._id);
+    setIsRestaurantModalOpen(true);
   };
 
   const addMenuItem = () => {
@@ -283,125 +326,97 @@ const HomePage = () => {
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <section className="restaurant-panel relative isolate grid min-h-[520px] overflow-hidden rounded-[2rem] bg-[#17201e] text-amber-50 sm:rounded-[2.5rem] lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="absolute left-5 top-5 hidden h-24 w-24 rounded-full border-2 border-amber-50/30 sm:block" />
-        <div className="absolute bottom-8 left-[44%] hidden h-3 w-40 -rotate-12 bg-[#f6c54e] lg:block" />
-        <div className="relative z-10 flex flex-col justify-between gap-8 p-5 sm:p-8 lg:p-10">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border-2 border-amber-50/70 bg-amber-50 px-3 py-1 text-xs font-black uppercase text-slate-950">
-              <Utensils className="h-4 w-4 text-[#f05d3b]" />
-              Live demo workspace
-            </div>
-            <h1 className="font-display max-w-4xl text-5xl font-black leading-[0.9] tracking-normal sm:text-7xl lg:text-8xl">
-              Run restaurants, manage menus, and order dinner from one place.
-            </h1>
-            <p className="mt-6 max-w-2xl text-base font-semibold leading-7 text-amber-50/75 sm:text-lg">
-              A full restaurant operating table for admins and owners, with a customer ordering lane that stays thumb-friendly.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Metric icon={Store} label="Restaurants" value={restaurants.length} />
-            <Metric icon={ClipboardList} label="Orders" value={orders.length} />
-            <Metric icon={UserRound} label="Demo users" value={accounts.length} />
-          </div>
-        </div>
-        <div className="relative min-h-[360px] overflow-hidden border-t-2 border-amber-50/20 lg:border-l-2 lg:border-t-0">
-          <img
-            src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&auto=format&fit=crop"
-            className="h-full min-h-[360px] w-full object-cover"
-            alt="Prepared restaurant dishes"
+    <div className={`grid items-start gap-5 transition-[grid-template-columns] duration-300 ease-out ${isMenuOpen ? "lg:grid-cols-[300px_minmax(0,1fr)]" : "lg:grid-cols-[0_minmax(0,1fr)]"}`}>
+      <AppMenuDrawer
+        user={user}
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        isOpen={isMenuOpen}
+        setIsOpen={setMenuOpen}
+        toggleMenu={toggleMenu}
+        counts={{
+          restaurants: restaurants.length,
+          orders: orders.length,
+          users: users.length,
+          cart: cartLines.length,
+          menu: restaurantForm.menuItems?.length || 0,
+        }}
+      />
+      <div className="min-w-0">
+        {user.role === "customer" ? (
+          <CustomerExperience
+            activeSection={activeSection}
+            restaurants={visibleRestaurants}
+            selectedRestaurant={selectedRestaurant}
+            selectedRestaurantId={selectedRestaurantId}
+            setSelectedRestaurantId={(id) => {
+              setSelectedRestaurantId(id);
+              setCart({});
+            }}
+            query={query}
+            setQuery={setQuery}
+            cartLines={cartLines}
+            subtotal={subtotal}
+            delivery={delivery}
+            total={total}
+            addToCart={addToCart}
+            changeQuantity={changeQuantity}
+            placeOrder={placeOrder}
+            orders={orders}
           />
-          <div className="absolute inset-x-5 bottom-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {["kitchen", "orders", "menus"].map((label) => (
-              <span key={label} className="rounded-full border-2 border-slate-950 bg-amber-50 px-3 py-2 text-center text-xs font-black uppercase text-slate-950 shadow-[3px_3px_0_#17201e]">
-                {label}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {user.role === "customer" ? (
-        <CustomerExperience
-          restaurants={visibleRestaurants}
-          selectedRestaurant={selectedRestaurant}
-          selectedRestaurantId={selectedRestaurantId}
-          setSelectedRestaurantId={(id) => {
-            setSelectedRestaurantId(id);
-            setCart({});
-          }}
-          query={query}
-          setQuery={setQuery}
-          cartLines={cartLines}
-          subtotal={subtotal}
-          delivery={delivery}
-          total={total}
-          addToCart={addToCart}
-          changeQuantity={changeQuantity}
-          placeOrder={placeOrder}
-          orders={orders}
-        />
-      ) : (
-        <ManagementExperience
-          role={user.role}
-          restaurants={restaurants}
-          users={users}
-          ownerOptions={ownerOptions}
-          restaurantForm={restaurantForm}
-          setRestaurantForm={setRestaurantForm}
-          saveRestaurant={saveRestaurant}
-          isSaving={saveRestaurantMutation.isPending}
-          editRestaurant={editRestaurant}
-          deleteRestaurant={deleteRestaurant}
-          addMenuItem={addMenuItem}
-          updateMenuItem={updateMenuItem}
-          removeMenuItem={removeMenuItem}
-          orders={orders}
-          updateOrderStatus={updateOrderStatus}
-        />
-      )}
+        ) : (
+          <ManagementExperience
+            role={user.role}
+            activeSection={activeSection}
+            restaurants={restaurants}
+            users={users}
+            ownerOptions={ownerOptions}
+            restaurantForm={restaurantForm}
+            setRestaurantForm={setRestaurantForm}
+            saveRestaurant={saveRestaurant}
+            isSaving={saveRestaurantMutation.isPending}
+            editRestaurant={editRestaurant}
+            deleteRestaurant={deleteRestaurant}
+            addMenuItem={addMenuItem}
+            updateMenuItem={updateMenuItem}
+            removeMenuItem={removeMenuItem}
+            orders={orders}
+            updateOrderStatus={updateOrderStatus}
+            isRestaurantModalOpen={isRestaurantModalOpen}
+            setIsRestaurantModalOpen={setIsRestaurantModalOpen}
+            expandedRestaurantId={expandedRestaurantId}
+            setExpandedRestaurantId={setExpandedRestaurantId}
+          />
+        )}
+      </div>
     </div>
   );
 };
 
-const LoginPage = ({ accounts, onLogin }: { accounts: AuthUser[]; onLogin: (userId: string) => void }) => (
-  <div className="mx-auto flex min-h-[72vh] w-full max-w-6xl items-center">
-    <section className="restaurant-panel grid w-full overflow-hidden rounded-[2rem] bg-card lg:grid-cols-[0.82fr_1.18fr]">
-      <div className="relative flex min-h-[520px] flex-col justify-between overflow-hidden bg-[#17201e] p-6 text-amber-50 sm:p-8">
-        <div className="absolute -right-16 top-10 h-44 w-44 rounded-full border-[22px] border-[#f05d3b]" />
-        <div className="absolute bottom-14 right-10 h-5 w-40 -rotate-12 bg-[#f6c54e]" />
-        <div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-amber-50 bg-[#f05d3b] shadow-[4px_4px_0_#f6c54e]">
-            <ChefHat className="h-7 w-7" />
-          </div>
-          <p className="mt-8 text-xs font-black uppercase text-[#f6c54e]">GoodEats access</p>
-          <h1 className="font-display mt-4 max-w-md text-6xl font-black leading-[0.9] sm:text-7xl">Choose your workspace.</h1>
-        </div>
+const LoginPage = ({ accounts, onLogin }: { accounts: AuthUser[]; onLogin: (userId: string) => void }) => {
+  const loginOptions = (["admin", "owner", "customer"] as const)
+    .map((role) => accounts.find((account) => account.role === role))
+    .filter(Boolean) as AuthUser[];
 
-        <div className="grid gap-3">
-          <Step label="Admin" title="Full system access" />
-          <Step label="Owner" title="Restaurant menu tools" />
-          <Step label="Customer" title="Ordering workspace" />
+  return (
+  <div className="mx-auto flex min-h-[72vh] w-full max-w-4xl items-center justify-center">
+    <section className="restaurant-panel grid w-full overflow-hidden rounded-xl bg-card md:grid-cols-[0.78fr_1.22fr]">
+      <div className="flex min-h-[360px] items-center justify-center bg-[#17201e] p-6 text-amber-50 sm:p-8">
+        <div>
+          <p className="text-xs font-black uppercase text-[#f6c54e]">GoodEats access</p>
+          <h1 className="font-display mt-3 text-5xl font-black leading-none sm:text-6xl">Login</h1>
         </div>
       </div>
 
-      <div className="flex min-h-[560px] flex-col">
-        <div className="border-b-2 border-slate-950 px-5 py-5 sm:px-6">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-900 text-amber-50">
-              <ShoppingBag className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-xs font-black uppercase text-slate-500">Sign in</p>
-              <p className="font-display text-xl font-black text-slate-950">GoodEats Restaurant OS</p>
-            </div>
-          </div>
+      <div className="flex min-h-[420px] flex-col">
+        <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+          <p className="text-xs font-black uppercase text-slate-500">Sign in</p>
+          <p className="font-display text-xl font-black text-slate-950">Select a demo role</p>
         </div>
 
-        <div className="flex flex-1 flex-col justify-center p-4 sm:p-6 md:p-8">
-          <div className="divide-y-2 divide-slate-950 overflow-hidden rounded-[1.5rem] border-2 border-slate-950 bg-white">
-            {accounts.map((account) => {
+        <div className="flex flex-1 flex-col justify-center p-4 sm:p-6">
+          <div className="overflow-hidden rounded-lg bg-white ring-1 ring-slate-200">
+            {loginOptions.map((account) => {
               const config = roleConfig[account.role];
               const Icon = config.icon;
 
@@ -410,9 +425,9 @@ const LoginPage = ({ accounts, onLogin }: { accounts: AuthUser[]; onLogin: (user
                   key={account.userId}
                   type="button"
                   onClick={() => onLogin(account.userId)}
-                  className="group grid w-full grid-cols-[auto_1fr] items-center gap-4 px-4 py-4 text-left transition hover:bg-[#f6c54e] focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:ring-offset-2 sm:grid-cols-[auto_1fr_auto]"
+                  className="group grid w-full grid-cols-[auto_1fr] items-center gap-4 border-b border-slate-100 px-4 py-4 text-left transition last:border-b-0 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:ring-offset-2 sm:grid-cols-[auto_1fr_auto]"
                 >
-                  <span className={`flex h-12 w-12 items-center justify-center rounded-full ${config.color}`}>
+                  <span className={`flex h-10 w-10 items-center justify-center rounded-full ${config.color}`}>
                     <Icon className="h-5 w-5" />
                   </span>
                   <span className="min-w-0">
@@ -430,10 +445,10 @@ const LoginPage = ({ accounts, onLogin }: { accounts: AuthUser[]; onLogin: (user
 
           <button
             type="button"
-            className="mt-5 flex w-full items-center gap-4 rounded-full border-2 border-transparent px-4 py-4 text-left font-black text-slate-700 transition hover:border-slate-950 hover:bg-card"
+            className="mt-5 flex w-full items-center gap-4 rounded-lg px-4 py-3 text-left font-black text-slate-700 transition hover:bg-white"
             onClick={() => toast.info("Manual account entry is a placeholder in this demo.")}
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-950">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
               <UserRound className="h-5 w-5" />
             </span>
             Use another account
@@ -442,9 +457,107 @@ const LoginPage = ({ accounts, onLogin }: { accounts: AuthUser[]; onLogin: (user
       </div>
     </section>
   </div>
-);
+  );
+};
+
+const AppMenuDrawer = ({
+  user,
+  activeSection,
+  setActiveSection,
+  isOpen,
+  setIsOpen,
+  toggleMenu,
+  counts,
+}: {
+  user: AuthUser;
+  activeSection: AppSection;
+  setActiveSection: (section: AppSection) => void;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  toggleMenu: () => void;
+  counts: { restaurants: number; orders: number; users: number; cart: number; menu: number };
+}) => {
+  const itemsByRole: Record<AuthUser["role"], { id: AppSection; label: string; icon: typeof Store; count?: number }[]> = {
+    admin: [
+      { id: "restaurants", label: "Restaurants", icon: Store, count: counts.restaurants },
+      { id: "orders", label: "Orders", icon: ClipboardList, count: counts.orders },
+      { id: "users", label: "Users", icon: UserRound, count: counts.users },
+    ],
+    owner: [
+      { id: "restaurants", label: "Restaurants", icon: Store, count: counts.restaurants },
+      { id: "orders", label: "Orders", icon: ClipboardList, count: counts.orders },
+      { id: "menu", label: "Menu items", icon: ReceiptText, count: counts.menu },
+      { id: "edit", label: "Edit restaurant", icon: Shield },
+    ],
+    customer: [
+      { id: "browse", label: "Browse food", icon: Store, count: counts.restaurants },
+      { id: "cart", label: "Cart", icon: ShoppingBag, count: counts.cart },
+      { id: "orders", label: "Orders", icon: ClipboardList, count: counts.orders },
+    ],
+  };
+
+  return (
+    <div className={`${isOpen ? "w-full opacity-100" : "w-0 opacity-100"} transition-[width] duration-300`}>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={toggleMenu}
+        className={`fixed left-4 top-20 z-40 h-11 rounded-full border-slate-300 bg-white px-4 font-black shadow-sm hover:bg-amber-50 ${isOpen ? "lg:hidden" : ""}`}
+      >
+        <Menu className="h-5 w-5" />
+        Menu
+      </Button>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[min(86vw,320px)] flex-col overflow-hidden border border-[#263531] bg-[#101c19] p-5 text-amber-50 shadow-2xl transition-all duration-300 lg:sticky lg:top-20 lg:z-20 lg:max-h-[calc(100vh-6rem)] lg:min-h-[calc(100vh-8rem)] lg:w-auto lg:rounded-xl lg:shadow-sm ${
+          isOpen ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-full opacity-0 lg:-translate-x-6"
+        }`}
+        aria-hidden={!isOpen}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-black uppercase text-[#f6c54e]">{user.role}</p>
+            <h2 className="font-display mt-1 text-4xl font-black leading-none">{user.name}</h2>
+          </div>
+          <Button type="button" size="icon" variant="ghost" className="rounded-full text-amber-50 hover:bg-amber-50/10 hover:text-amber-50" onClick={() => setIsOpen(false)}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <nav className="mt-8 grid gap-2">
+          {itemsByRole[user.role].map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  setActiveSection(item.id);
+                }}
+                className={`flex items-center justify-between rounded-lg px-4 py-3 text-left font-black transition ${
+                  isActive ? "bg-[#f6c54e] text-slate-950" : "text-amber-50/80 hover:bg-amber-50/10 hover:text-amber-50"
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <Icon className="h-5 w-5" />
+                  {item.label}
+                </span>
+                {typeof item.count === "number" ? <span className="text-xs opacity-70">{item.count}</span> : null}
+              </button>
+            );
+          })}
+        </nav>
+        <div className="mt-auto rounded-lg border border-amber-50/10 bg-amber-50/5 p-3">
+          <p className="text-xs font-black uppercase text-[#f6c54e]">Sticky menu</p>
+          <p className="mt-1 text-sm font-semibold text-amber-50/70">Open or closed, the page layout keeps its shape instead of covering your work.</p>
+        </div>
+      </aside>
+    </div>
+  );
+};
 
 const CustomerExperience = ({
+  activeSection,
   restaurants,
   selectedRestaurant,
   selectedRestaurantId,
@@ -460,6 +573,7 @@ const CustomerExperience = ({
   placeOrder,
   orders,
 }: {
+  activeSection: AppSection;
   restaurants: Restaurant[];
   selectedRestaurant?: Restaurant;
   selectedRestaurantId: string;
@@ -474,8 +588,117 @@ const CustomerExperience = ({
   changeQuantity: (itemId: string, delta: number) => void;
   placeOrder: () => void;
   orders: Order[];
-}) => (
-  <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_360px]">
+}) => {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const itemCount = cartLines.reduce((count, line) => count + line.quantity, 0);
+
+  const cartPanel = (
+    <div className="restaurant-panel-soft rounded-[1.25rem] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-black uppercase text-[#f05d3b]">Current order</p>
+          <h2 className="font-display flex items-center gap-2 text-3xl font-black leading-none">
+            <ShoppingBag className="h-5 w-5 text-[#f05d3b]" />
+            Cart
+          </h2>
+        </div>
+        <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-black text-slate-900">{itemCount} items</span>
+      </div>
+      <div className="mt-4 max-h-[42vh] space-y-3 overflow-y-auto pr-1">
+        {cartLines.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm font-bold text-slate-500">
+            Select a menu item to start an order.
+          </div>
+        ) : (
+          cartLines.map((line) => (
+            <div key={line.item._id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl bg-white p-3 ring-1 ring-slate-200">
+              <div className="min-w-0">
+                <p className="truncate font-bold">{line.item.name}</p>
+                <p className="text-sm text-slate-500">{money(line.item.price * line.quantity)}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-2 border-slate-950" onClick={() => changeQuantity(line.item._id, -1)}><Minus className="h-3.5 w-3.5" /></Button>
+                <span className="w-6 text-center font-bold">{line.quantity}</span>
+                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-2 border-slate-950" onClick={() => changeQuantity(line.item._id, 1)}><Plus className="h-3.5 w-3.5" /></Button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      <div className="mt-5 space-y-2 border-t-2 border-slate-950 pt-4 text-sm">
+        <PriceRow label="Subtotal" value={subtotal} />
+        <PriceRow label="Delivery" value={cartLines.length ? delivery : 0} />
+        <PriceRow label="Total" value={cartLines.length ? total : 0} strong />
+      </div>
+      <Button disabled={cartLines.length === 0} onClick={placeOrder} className="mt-4 h-12 w-full rounded-full border-2 border-slate-950 bg-[#f05d3b] font-black text-white shadow-[3px_3px_0_#17201e] hover:bg-[#d94f32]">
+        <CheckCircle2 className="h-4 w-4" />
+        Place order
+      </Button>
+    </div>
+  );
+
+  const cartPopout = (
+    <>
+      {isCartOpen ? (
+        <button
+          type="button"
+          aria-label="Close cart"
+          className="fixed inset-0 z-30 cursor-default bg-transparent"
+          onClick={() => setIsCartOpen(false)}
+        />
+      ) : null}
+      <div className="fixed right-3 top-[4.6rem] z-40 sm:right-40 sm:top-3 lg:right-48">
+        <Button
+          type="button"
+          aria-expanded={isCartOpen}
+          aria-controls="customer-cart-popout"
+          onClick={() => setIsCartOpen((open) => !open)}
+          className="group h-11 rounded-full border-2 border-slate-950 bg-[#17201e] px-3 font-black text-amber-50 shadow-[3px_3px_0_#f05d3b] hover:bg-emerald-900 sm:h-10"
+        >
+          <span className="relative grid h-6 w-6 place-items-center rounded-full bg-amber-50 text-slate-950">
+            <ShoppingBag className="h-4 w-4" />
+            {itemCount > 0 ? (
+              <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full border border-slate-950 bg-[#f6c54e] px-1 text-[10px] leading-none text-slate-950">
+                {itemCount}
+              </span>
+            ) : null}
+          </span>
+          <span className="hidden sm:inline">{cartLines.length ? money(total) : "Cart"}</span>
+        </Button>
+        {isCartOpen ? (
+          <div
+            id="customer-cart-popout"
+            className="absolute right-0 mt-3 w-[min(92vw,390px)] origin-top-right animate-in fade-in-0 zoom-in-95"
+          >
+            {cartPanel}
+          </div>
+        ) : null}
+      </div>
+    </>
+  );
+
+  if (activeSection === "cart") {
+    return (
+      <>
+        {cartPopout}
+        <div className="mx-auto max-w-xl">{cartPanel}</div>
+      </>
+    );
+  }
+
+  if (activeSection === "orders") {
+    return (
+      <>
+        {cartPopout}
+        <OrderList orders={orders} />
+      </>
+    );
+  }
+
+  return (
+  <>
+  {cartPopout}
+  <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)]">
     <aside className="restaurant-panel-soft h-fit rounded-[1.5rem] p-4 lg:sticky lg:top-24">
       <div className="mb-4 flex items-center justify-between gap-3">
         <span className="ink-pill"><Sparkles className="h-3.5 w-3.5" />Eat</span>
@@ -540,45 +763,14 @@ const CustomerExperience = ({
       )}
     </section>
 
-    <aside className="space-y-4 lg:col-span-2 xl:sticky xl:top-24 xl:col-span-1 xl:h-fit">
-      <div className="restaurant-panel-soft rounded-[1.5rem] p-4">
-        <h2 className="font-display flex items-center gap-2 text-3xl font-black"><ShoppingBag className="h-5 w-5 text-[#f05d3b]" />Cart</h2>
-        <div className="mt-4 space-y-3">
-          {cartLines.length === 0 ? (
-            <p className="text-sm text-slate-500">Select a menu item to start an order.</p>
-          ) : (
-            cartLines.map((line) => (
-              <div key={line.item._id} className="flex items-center justify-between gap-3 rounded-2xl bg-white p-3">
-                <div>
-                  <p className="font-bold">{line.item.name}</p>
-                  <p className="text-sm text-slate-500">{money(line.item.price * line.quantity)}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" className="rounded-full border-2 border-slate-950" onClick={() => changeQuantity(line.item._id, -1)}><Minus /></Button>
-                  <span className="w-6 text-center font-bold">{line.quantity}</span>
-                  <Button variant="outline" size="icon" className="rounded-full border-2 border-slate-950" onClick={() => changeQuantity(line.item._id, 1)}><Plus /></Button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-        <div className="mt-5 space-y-2 border-t-2 border-slate-950 pt-4 text-sm">
-          <PriceRow label="Subtotal" value={subtotal} />
-          <PriceRow label="Delivery" value={cartLines.length ? delivery : 0} />
-          <PriceRow label="Total" value={cartLines.length ? total : 0} strong />
-        </div>
-        <Button disabled={cartLines.length === 0} onClick={placeOrder} className="mt-4 h-12 w-full rounded-full border-2 border-slate-950 bg-[#f05d3b] font-black text-white shadow-[3px_3px_0_#17201e] hover:bg-[#d94f32]">
-          <CheckCircle2 className="h-4 w-4" />
-          Place order
-        </Button>
-      </div>
-      <OrderList orders={orders} />
-    </aside>
   </div>
-);
+  </>
+  );
+};
 
 const ManagementExperience = ({
   role,
+  activeSection,
   restaurants,
   users,
   ownerOptions,
@@ -593,8 +785,13 @@ const ManagementExperience = ({
   removeMenuItem,
   orders,
   updateOrderStatus,
+  isRestaurantModalOpen,
+  setIsRestaurantModalOpen,
+  expandedRestaurantId,
+  setExpandedRestaurantId,
 }: {
   role: "admin" | "owner";
+  activeSection: AppSection;
   restaurants: Restaurant[];
   users: User[];
   ownerOptions: AuthUser[];
@@ -609,143 +806,460 @@ const ManagementExperience = ({
   removeMenuItem: (index: number) => void;
   orders: Order[];
   updateOrderStatus: (orderId: string, status: string) => void;
-}) => (
-  <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_440px]">
-    <section className="space-y-5">
-      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-        {restaurants.map((restaurant) => (
-          <div key={restaurant._id} className="restaurant-panel-soft overflow-hidden rounded-[1.5rem]">
-            <img src={restaurant.imageUrl} className="h-44 w-full border-b-2 border-slate-950 object-cover" alt={restaurant.restaurantName} />
-            <div className="space-y-3 p-4">
-              <div>
-                <h3 className="font-display text-3xl font-black leading-none">{restaurant.restaurantName}</h3>
-                <p className="mt-2 text-sm font-semibold text-slate-500">{restaurant.city} / {restaurant.cuisines.join(", ")}</p>
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs font-bold uppercase text-slate-500">
-                <span className="rounded-full border border-slate-950 bg-[#f6c54e] px-2 py-1 text-slate-950">{restaurant.menuItems.length} menu items</span>
-                <span className="rounded-full border border-slate-950 bg-white px-2 py-1 text-slate-950">{restaurant.ownerId || "admin-owned"}</span>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="rounded-full border-2 border-slate-950 bg-white font-black" onClick={() => editRestaurant(restaurant)}>Edit</Button>
-                {role === "admin" ? (
-                  <Button variant="destructive" className="rounded-full border-2 border-slate-950 font-black" onClick={() => deleteRestaurant(restaurant._id)}><Trash2 />Remove</Button>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <OrderList orders={orders} onStatus={updateOrderStatus} />
-      {role === "admin" ? (
-        <div className="restaurant-panel-soft rounded-[1.5rem] p-4">
-          <h2 className="font-display text-3xl font-black">Users</h2>
-          <div className="mt-3 grid gap-2 md:grid-cols-2">
-            {users.map((managedUser) => (
-              <div key={managedUser.userId} className="rounded-2xl border-2 border-slate-950 bg-white p-3">
-                <p className="font-bold">{managedUser.name}</p>
-                <p className="text-sm text-slate-500">{managedUser.email} / {managedUser.role}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </section>
-
-    <form onSubmit={saveRestaurant} className="restaurant-panel h-fit space-y-4 rounded-[1.5rem] p-4 sm:p-5 xl:sticky xl:top-24">
-      <div>
-        <h2 className="font-display text-4xl font-black leading-none">{restaurantForm._id ? "Edit restaurant" : "Add restaurant"}</h2>
-        {role === "owner" ? <p className="mt-1 text-sm text-slate-500">Owners can change menu details, but the restaurant name stays locked.</p> : null}
-      </div>
-
-      <Field label="Restaurant name">
-        <Input
-          disabled={role === "owner"}
-          value={restaurantForm.restaurantName || ""}
-          onChange={(event) => setRestaurantForm((current) => ({ ...current, restaurantName: event.target.value }))}
-        />
-      </Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="City">
-          <Input value={restaurantForm.city || ""} onChange={(event) => setRestaurantForm((current) => ({ ...current, city: event.target.value }))} />
-        </Field>
-        <Field label="Country">
-          <Input value={restaurantForm.country || ""} onChange={(event) => setRestaurantForm((current) => ({ ...current, country: event.target.value }))} />
-        </Field>
-      </div>
-      <Field label="Cuisines">
-        <Input
-          value={(restaurantForm.cuisines || []).join(", ")}
-          onChange={(event) => setRestaurantForm((current) => ({ ...current, cuisines: event.target.value.split(",").map((value) => value.trim()) }))}
-        />
-      </Field>
-      {role === "admin" ? (
-        <Field label="Owner">
-          <select
-            className="h-11 w-full rounded-full border-2 border-slate-950 bg-white px-3 text-sm font-bold"
-            value={restaurantForm.ownerId || ""}
-            onChange={(event) => setRestaurantForm((current) => ({ ...current, ownerId: event.target.value || null }))}
+  isRestaurantModalOpen: boolean;
+  setIsRestaurantModalOpen: (open: boolean) => void;
+  expandedRestaurantId: string;
+  setExpandedRestaurantId: (id: string) => void;
+}) => {
+  const restaurantCards = (
+    <div className="grid gap-3">
+      {restaurants.map((restaurant) => (
+        <div key={restaurant._id} className="restaurant-panel-soft overflow-hidden rounded-xl bg-white">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setExpandedRestaurantId(expandedRestaurantId === restaurant._id ? "" : restaurant._id)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setExpandedRestaurantId(expandedRestaurantId === restaurant._id ? "" : restaurant._id);
+              }
+            }}
+            className="grid w-full gap-4 p-3 text-left transition hover:bg-amber-50/60 md:grid-cols-[180px_minmax(0,1fr)_auto]"
           >
-            <option value="">No owner</option>
-            {ownerOptions.map((owner) => <option key={owner.userId} value={owner.userId}>{owner.name}</option>)}
-          </select>
-        </Field>
-      ) : null}
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Delivery price">
-          <Input type="number" value={restaurantForm.deliveryPrice || 0} onChange={(event) => setRestaurantForm((current) => ({ ...current, deliveryPrice: Number(event.target.value) }))} />
-        </Field>
-        <Field label="ETA minutes">
-          <Input type="number" value={restaurantForm.estimatedDeliveryTime || 0} onChange={(event) => setRestaurantForm((current) => ({ ...current, estimatedDeliveryTime: Number(event.target.value) }))} />
-        </Field>
-      </div>
-      <Field label="Image URL">
-        <Input value={restaurantForm.imageUrl || ""} onChange={(event) => setRestaurantForm((current) => ({ ...current, imageUrl: event.target.value }))} />
-      </Field>
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-black">Menu</h3>
-          <Button type="button" variant="outline" className="rounded-full border-2 border-slate-950 bg-white font-black" onClick={addMenuItem}><Plus />Item</Button>
-        </div>
-        {(restaurantForm.menuItems || []).map((item, index) => (
-          <div key={item._id} className="space-y-2 rounded-2xl border-2 border-slate-950 bg-white p-3">
-            <Input value={item.name} onChange={(event) => updateMenuItem(index, { name: event.target.value })} />
-            <Input value={item.description || ""} onChange={(event) => updateMenuItem(index, { description: event.target.value })} />
-            <div className="flex gap-2">
-              <Input type="number" value={item.price} onChange={(event) => updateMenuItem(index, { price: Number(event.target.value) })} />
-              <Button type="button" variant="outline" size="icon" className="rounded-full border-2 border-slate-950" onClick={() => removeMenuItem(index)}><Trash2 /></Button>
+            <img src={restaurant.imageUrl} className="h-36 w-full rounded-lg object-cover md:h-32" alt={restaurant.restaurantName} />
+            <div className="min-w-0 self-center">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-display text-3xl font-black leading-none">{restaurant.restaurantName}</h3>
+                <span className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase ${restaurant.isActive ? "bg-emerald-100 text-emerald-900" : "bg-slate-200 text-slate-600"}`}>
+                  {restaurant.isActive ? "Active" : "Paused"}
+                </span>
+              </div>
+              <p className="mt-2 text-sm font-semibold text-slate-500">{restaurant.city} / {restaurant.cuisines.join(", ")}</p>
+              <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-black uppercase text-slate-600">
+                <span className="rounded-full bg-amber-100 px-2 py-1">{restaurant.menuItems.length} items</span>
+                <span className="rounded-full bg-slate-100 px-2 py-1">{orders.filter((order) => order.restaurantId === restaurant._id).length} orders</span>
+                <span className="rounded-full bg-slate-100 px-2 py-1">{restaurant.ownerId || "admin-owned"}</span>
+              </div>
             </div>
+            <div className="flex items-center gap-2 self-center">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-10 rounded-full border-slate-300 bg-white font-bold"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  editRestaurant(restaurant);
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
+              {role === "admin" ? (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="h-10 rounded-full font-bold"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    deleteRestaurant(restaurant._id);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              ) : null}
+              <ChevronDown className={`h-5 w-5 transition ${expandedRestaurantId === restaurant._id ? "rotate-180" : ""}`} />
+            </div>
+          </div>
+          {expandedRestaurantId === restaurant._id ? (
+            <div className="grid gap-3 border-t border-slate-200 bg-[#fbf6ea] p-4 lg:grid-cols-2">
+              <div>
+                <h4 className="flex items-center gap-2 text-sm font-black uppercase text-slate-600"><UtensilsCrossed className="h-4 w-4" />Items</h4>
+                <div className="mt-2 grid gap-2">
+                  {restaurant.menuItems.map((item) => (
+                    <div key={item._id} className="rounded-lg bg-white p-3 ring-1 ring-slate-200">
+                      <div className="flex justify-between gap-3">
+                        <p className="font-black">{item.name}</p>
+                        <p className="font-black text-emerald-900">{money(item.price)}</p>
+                      </div>
+                      <p className="mt-1 text-sm font-semibold text-slate-500">{item.description || "No description yet"}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="flex items-center gap-2 text-sm font-black uppercase text-slate-600"><ReceiptText className="h-4 w-4" />Orders</h4>
+                <div className="mt-2 grid gap-2">
+                  {orders.filter((order) => order.restaurantId === restaurant._id).length ? (
+                    orders.filter((order) => order.restaurantId === restaurant._id).map((order) => (
+                      <div key={order._id} className="rounded-lg bg-white p-3 ring-1 ring-slate-200">
+                        <div className="flex justify-between gap-3">
+                          <p className="font-black">{order.customerName}</p>
+                          <p className="font-black">{money(order.total)}</p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-500">{order.orderId} / {order.status}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-slate-300 bg-white p-4 text-sm font-bold text-slate-500">No orders for this restaurant yet.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+
+  const usersPanel = (
+    <div className="restaurant-panel-soft rounded-lg p-4">
+      <h2 className="font-display text-3xl font-black">Users</h2>
+      <div className="mt-4 grid gap-2 md:grid-cols-2">
+        {users.map((managedUser) => (
+          <div key={managedUser.userId} className="rounded-lg bg-white p-3 ring-1 ring-slate-200">
+            <p className="font-bold">{managedUser.name}</p>
+            <p className="text-sm text-slate-500">{managedUser.email} / {managedUser.role}</p>
           </div>
         ))}
       </div>
+    </div>
+  );
 
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isSaving} className="rounded-full border-2 border-slate-950 bg-[#17201e] font-black text-amber-50 shadow-[3px_3px_0_#f05d3b]">{isSaving ? "Saving..." : "Save changes"}</Button>
-        {role === "admin" ? <Button type="button" variant="outline" className="rounded-full border-2 border-slate-950 bg-white font-black" onClick={() => setRestaurantForm(blankRestaurant())}>New</Button> : null}
+  if (role === "admin") {
+    return (
+        <section className="space-y-4">
+          {activeSection === "restaurants" ? (
+            <div className="restaurant-panel-soft flex flex-col gap-3 rounded-xl p-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase text-[#f05d3b]">Admin restaurants</p>
+                <h1 className="font-display text-4xl font-black leading-none">Expandable restaurant board</h1>
+              </div>
+              <Button
+                type="button"
+                className="h-11 rounded-full bg-[#17201e] px-5 font-black text-amber-50 hover:bg-emerald-900"
+                onClick={() => {
+                  setRestaurantForm(blankRestaurant());
+                  setIsRestaurantModalOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                Restaurant
+              </Button>
+            </div>
+          ) : null}
+          {activeSection === "restaurants" ? restaurantCards : null}
+          {activeSection === "orders" ? <OrderList orders={orders} onStatus={updateOrderStatus} /> : null}
+          {activeSection === "users" ? usersPanel : null}
+          <ModalPanel isOpen={isRestaurantModalOpen} onClose={() => setIsRestaurantModalOpen(false)}>
+            <RestaurantFormPanel
+              role={role}
+              restaurantForm={restaurantForm}
+              setRestaurantForm={setRestaurantForm}
+              saveRestaurant={saveRestaurant}
+              isSaving={isSaving}
+              ownerOptions={ownerOptions}
+              addMenuItem={addMenuItem}
+              updateMenuItem={updateMenuItem}
+              removeMenuItem={removeMenuItem}
+              showMenu
+            />
+          </ModalPanel>
+        </section>
+    );
+  }
+
+  return (
+    <section className="space-y-4">
+      {activeSection === "restaurants" ? restaurantCards : null}
+      {activeSection === "orders" ? <OrderList orders={orders} onStatus={updateOrderStatus} /> : null}
+      {activeSection === "menu" ? (
+        <form onSubmit={saveRestaurant} className="restaurant-panel-soft rounded-xl p-4 sm:p-5">
+          <div className="mb-5 flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase text-[#f05d3b]">Owner menu studio</p>
+              <h2 className="font-display text-4xl font-black leading-none">Menu items</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-500">{restaurantForm.menuItems?.length || 0} items in this restaurant</p>
+            </div>
+            <Button type="submit" disabled={isSaving} className="h-11 rounded-full bg-[#17201e] px-5 font-black text-amber-50 hover:bg-emerald-900">
+              <Save className="h-4 w-4" />
+              {isSaving ? "Saving..." : "Save menu"}
+            </Button>
+          </div>
+          <MenuEditor
+            menuItems={restaurantForm.menuItems || []}
+            addMenuItem={addMenuItem}
+            updateMenuItem={updateMenuItem}
+            removeMenuItem={removeMenuItem}
+          />
+        </form>
+      ) : null}
+      {activeSection === "edit" ? <RestaurantFormPanel
+        role={role}
+        restaurantForm={restaurantForm}
+        setRestaurantForm={setRestaurantForm}
+        saveRestaurant={saveRestaurant}
+        isSaving={isSaving}
+        ownerOptions={ownerOptions}
+        addMenuItem={addMenuItem}
+        updateMenuItem={updateMenuItem}
+        removeMenuItem={removeMenuItem}
+      /> : null}
+    </section>
+  );
+};
+
+const RestaurantFormPanel = ({
+  role,
+  restaurantForm,
+  setRestaurantForm,
+  saveRestaurant,
+  isSaving,
+  ownerOptions,
+  addMenuItem,
+  updateMenuItem,
+  removeMenuItem,
+  showMenu = false,
+}: {
+  role: "admin" | "owner";
+  restaurantForm: Partial<Restaurant>;
+  setRestaurantForm: React.Dispatch<React.SetStateAction<Partial<Restaurant>>>;
+  saveRestaurant: (event: FormEvent) => void;
+  isSaving: boolean;
+  ownerOptions: AuthUser[];
+  addMenuItem: () => void;
+  updateMenuItem: (index: number, patch: Partial<MenuItem>) => void;
+  removeMenuItem: (index: number) => void;
+  showMenu?: boolean;
+}) => (
+  <form onSubmit={saveRestaurant} className="restaurant-panel h-fit space-y-5 rounded-xl p-4 sm:p-5">
+    <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <p className="text-xs font-black uppercase text-[#f05d3b]">{role === "admin" ? "Admin edit modal" : "Owner edit station"}</p>
+        <h2 className="font-display text-4xl font-black leading-none">{restaurantForm._id ? "Edit restaurant" : "Add restaurant"}</h2>
+        {role === "owner" ? <p className="mt-1 text-sm font-semibold text-slate-500">Restaurant name stays locked, but operations are editable.</p> : null}
       </div>
-    </form>
+      <label className="flex cursor-pointer items-center gap-2 rounded-full bg-white px-3 py-2 text-sm font-black ring-1 ring-slate-200">
+        <input
+          type="checkbox"
+          className="h-4 w-4 accent-emerald-800"
+          checked={restaurantForm.isActive ?? true}
+          onChange={(event) => setRestaurantForm((current) => ({ ...current, isActive: event.target.checked }))}
+        />
+        Active
+      </label>
+    </div>
+
+    <div className="grid gap-4 lg:grid-cols-[1fr_0.85fr]">
+      <div className="space-y-4">
+        <Field label="Restaurant name">
+          <Input
+            type="text"
+            disabled={role === "owner"}
+            className="h-12 rounded-lg border-slate-300 bg-white font-bold"
+            value={restaurantForm.restaurantName || ""}
+            onChange={(event) => setRestaurantForm((current) => ({ ...current, restaurantName: event.target.value }))}
+          />
+        </Field>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="City">
+            <Input type="text" className="h-11 rounded-lg border-slate-300 bg-white font-bold" value={restaurantForm.city || ""} onChange={(event) => setRestaurantForm((current) => ({ ...current, city: event.target.value }))} />
+          </Field>
+          <Field label="Country">
+            <select
+              className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold"
+              value={restaurantForm.country || "USA"}
+              onChange={(event) => setRestaurantForm((current) => ({ ...current, country: event.target.value }))}
+            >
+              <option value="USA">USA</option>
+              <option value="Canada">Canada</option>
+              <option value="UK">UK</option>
+              <option value="Mexico">Mexico</option>
+            </select>
+          </Field>
+        </div>
+        <Field label="Cuisines">
+          <div className="relative">
+            <Tags className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-500" />
+            <Input
+              type="text"
+              className="h-11 rounded-lg border-slate-300 bg-white pl-10 font-bold"
+              value={(restaurantForm.cuisines || []).join(", ")}
+              onChange={(event) => setRestaurantForm((current) => ({ ...current, cuisines: event.target.value.split(",").map((value) => value.trim()) }))}
+              placeholder="Comfort, American, Brunch"
+            />
+          </div>
+        </Field>
+        {role === "admin" ? (
+          <Field label="Owner">
+            <select
+              className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold"
+              value={restaurantForm.ownerId || ""}
+              onChange={(event) => setRestaurantForm((current) => ({ ...current, ownerId: event.target.value || null }))}
+            >
+              <option value="">No owner</option>
+              {ownerOptions.map((owner) => <option key={owner.userId} value={owner.userId}>{owner.name}</option>)}
+            </select>
+          </Field>
+        ) : null}
+        <Field label="Image URL">
+          <div className="relative">
+            <Image className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-500" />
+            <Input type="url" className="h-11 rounded-lg border-slate-300 bg-white pl-10 font-bold" value={restaurantForm.imageUrl || ""} onChange={(event) => setRestaurantForm((current) => ({ ...current, imageUrl: event.target.value }))} />
+          </div>
+        </Field>
+      </div>
+
+      <div className="space-y-4 rounded-xl bg-[#fbf6ea] p-4 ring-1 ring-slate-200">
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal className="h-5 w-5 text-[#f05d3b]" />
+          <h3 className="font-display text-2xl font-black leading-none">Operations</h3>
+        </div>
+        <Field label={`Delivery price ${money(restaurantForm.deliveryPrice || 0)}`}>
+          <input
+            type="range"
+            min="0"
+            max="1299"
+            step="50"
+            value={restaurantForm.deliveryPrice || 0}
+            onChange={(event) => setRestaurantForm((current) => ({ ...current, deliveryPrice: Number(event.target.value) }))}
+            className="w-full accent-emerald-800"
+          />
+          <Input type="number" className="mt-2 h-10 rounded-lg border-slate-300 bg-white font-bold" value={restaurantForm.deliveryPrice || 0} onChange={(event) => setRestaurantForm((current) => ({ ...current, deliveryPrice: Number(event.target.value) }))} />
+        </Field>
+        <Field label={`ETA ${restaurantForm.estimatedDeliveryTime || 0} minutes`}>
+          <input
+            type="range"
+            min="10"
+            max="90"
+            step="5"
+            value={restaurantForm.estimatedDeliveryTime || 0}
+            onChange={(event) => setRestaurantForm((current) => ({ ...current, estimatedDeliveryTime: Number(event.target.value) }))}
+            className="w-full accent-[#f05d3b]"
+          />
+          <Input type="number" className="mt-2 h-10 rounded-lg border-slate-300 bg-white font-bold" value={restaurantForm.estimatedDeliveryTime || 0} onChange={(event) => setRestaurantForm((current) => ({ ...current, estimatedDeliveryTime: Number(event.target.value) }))} />
+        </Field>
+        <div className="grid grid-cols-2 gap-2 text-sm font-black">
+          <div className="rounded-lg bg-white p-3 ring-1 ring-slate-200"><DollarSign className="mb-1 h-4 w-4 text-emerald-800" />{money(restaurantForm.deliveryPrice || 0)}</div>
+          <div className="rounded-lg bg-white p-3 ring-1 ring-slate-200"><Clock className="mb-1 h-4 w-4 text-[#f05d3b]" />{restaurantForm.estimatedDeliveryTime || 0} min</div>
+        </div>
+      </div>
+    </div>
+
+    {showMenu ? (
+      <MenuEditor
+        menuItems={restaurantForm.menuItems || []}
+        addMenuItem={addMenuItem}
+        updateMenuItem={updateMenuItem}
+        removeMenuItem={removeMenuItem}
+      />
+    ) : null}
+
+    <div className="flex flex-wrap gap-2 border-t border-slate-200 pt-4">
+      <Button type="submit" disabled={isSaving} className="h-11 rounded-full bg-[#17201e] px-5 font-black text-amber-50 hover:bg-emerald-900">
+        <Save className="h-4 w-4" />
+        {isSaving ? "Saving..." : "Save changes"}
+      </Button>
+      {role === "admin" ? <Button type="button" variant="outline" className="h-11 rounded-full border-slate-300 bg-white font-bold" onClick={() => setRestaurantForm(blankRestaurant())}>New</Button> : null}
+    </div>
+  </form>
+);
+
+const MenuEditor = ({
+  menuItems,
+  addMenuItem,
+  updateMenuItem,
+  removeMenuItem,
+}: {
+  menuItems: MenuItem[];
+  addMenuItem: () => void;
+  updateMenuItem: (index: number, patch: Partial<MenuItem>) => void;
+  removeMenuItem: (index: number) => void;
+}) => (
+  <div className="space-y-3">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-xs font-black uppercase text-slate-500">Kitchen catalog</p>
+        <h3 className="font-display text-3xl font-black leading-none">Menu</h3>
+      </div>
+      <Button type="button" variant="outline" className="h-10 rounded-full border-slate-300 bg-white font-bold" onClick={addMenuItem}><Plus className="h-4 w-4" />Item</Button>
+    </div>
+    {menuItems.map((item, index) => (
+      <div key={item._id} className="rounded-xl bg-white p-3 ring-1 ring-slate-200">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_auto]">
+          <div className="grid gap-2">
+            <Label className="text-xs font-black uppercase text-slate-600">Item name</Label>
+            <Input type="text" className="h-11 rounded-lg border-slate-300 bg-white font-bold" value={item.name} onChange={(event) => updateMenuItem(index, { name: event.target.value })} />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-xs font-black uppercase text-slate-600">Price band</Label>
+            <select
+              className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-sm font-bold"
+              value={item.price < 1000 ? "snack" : item.price < 1600 ? "plate" : "premium"}
+              onChange={(event) => {
+                const nextPrice = event.target.value === "snack" ? 799 : event.target.value === "plate" ? 1399 : 2199;
+                updateMenuItem(index, { price: nextPrice });
+              }}
+            >
+              <option value="snack">Snack</option>
+              <option value="plate">Plate</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+          <Button type="button" variant="outline" size="icon" className="self-end rounded-full border-slate-300" onClick={() => removeMenuItem(index)}><Trash2 className="h-4 w-4" /></Button>
+        </div>
+        <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_260px]">
+          <div className="grid gap-2">
+            <Label className="text-xs font-black uppercase text-slate-600">Description</Label>
+            <Input type="text" className="h-11 rounded-lg border-slate-300 bg-white font-bold" value={item.description || ""} onChange={(event) => updateMenuItem(index, { description: event.target.value })} />
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-xs font-black uppercase text-slate-600">Price {money(item.price)}</Label>
+            <input
+              type="range"
+              min="499"
+              max="2999"
+              step="50"
+              value={item.price}
+              onChange={(event) => updateMenuItem(index, { price: Number(event.target.value) })}
+              className="mt-1 w-full accent-emerald-800"
+            />
+            <Input type="number" className="h-10 rounded-lg border-slate-300 bg-white font-bold" value={item.price} onChange={(event) => updateMenuItem(index, { price: Number(event.target.value) })} />
+          </div>
+        </div>
+      </div>
+    ))}
   </div>
 );
 
-const Metric = ({ icon: Icon, label, value }: { icon: typeof Store; label: string; value: number }) => (
-  <div className="rounded-[1.25rem] border-2 border-amber-50/40 bg-amber-50/10 p-4 backdrop-blur">
-    <Icon className="mb-3 h-5 w-5 text-[#f6c54e]" />
-    <p className="font-display text-4xl font-black">{value}</p>
-    <p className="text-sm font-semibold text-amber-50/70">{label}</p>
-  </div>
-);
+const ModalPanel = ({
+  isOpen,
+  onClose,
+  children,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-3 backdrop-blur-sm" role="dialog" aria-modal="true">
+      <button type="button" className="absolute inset-0 cursor-default" aria-label="Close modal" onClick={onClose} />
+      <div className="relative max-h-[88vh] w-full max-w-5xl overflow-y-auto rounded-xl shadow-2xl">
+        <Button type="button" size="icon" variant="outline" className="absolute right-3 top-3 z-10 rounded-full bg-white" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
+        {children}
+      </div>
+    </div>
+  );
+};
 
 const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="space-y-2">
     <Label className="text-xs font-black uppercase text-slate-600">{label}</Label>
     {children}
-  </div>
-);
-
-const Step = ({ label, title }: { label: string; title: string }) => (
-  <div className="rounded-2xl border-2 border-amber-50/30 bg-amber-50/10 p-3 backdrop-blur">
-    <p className="font-black text-[#f6c54e]">{label}</p>
-    <p className="font-semibold">{title}</p>
   </div>
 );
 

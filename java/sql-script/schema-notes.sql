@@ -1,0 +1,3 @@
+-- Schema is managed by Spring Data JPA/Hibernate.
+-- These table names intentionally match the old Express API domain:
+-- users, restaurants, orders.

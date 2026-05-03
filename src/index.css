@@ -68,10 +68,8 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
-    background-image:
-      linear-gradient(rgba(22, 34, 32, 0.055) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(22, 34, 32, 0.055) 1px, transparent 1px);
-    background-size: 28px 28px;
+    background-image: linear-gradient(180deg, #fbf6ea 0%, #f5ecd9 100%);
+    background-attachment: fixed;
   }
 
   h1,
@@ -92,15 +90,15 @@
 
 @layer utilities {
   .restaurant-panel {
-    @apply border-2 border-slate-950 bg-card shadow-[6px_6px_0_#17201e];
+    @apply border border-slate-200 bg-card shadow-sm;
   }
 
   .restaurant-panel-soft {
-    @apply border-2 border-slate-950 bg-card shadow-[3px_3px_0_#17201e];
+    @apply border border-slate-200 bg-card shadow-sm;
   }
 
   .ink-pill {
-    @apply inline-flex items-center gap-2 rounded-full border-2 border-slate-950 bg-card px-3 py-1 text-xs font-black uppercase text-slate-900;
+    @apply inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-black uppercase text-slate-900;
   }
 
   .scrollbar-thin {
