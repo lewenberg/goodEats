@@ -122,7 +122,16 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 p-10 rounded-lg">
+        className="restaurant-panel mx-auto max-w-6xl space-y-8 rounded-[2rem] p-4 sm:p-6 lg:p-10">
+        <div className="flex flex-col gap-3 border-b-2 border-slate-950 pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase text-[#f05d3b]">Owner command center</p>
+            <h1 className="font-display text-5xl font-black leading-none sm:text-6xl">Restaurant studio</h1>
+          </div>
+          <p className="max-w-md text-sm font-semibold text-slate-600">
+            Shape the storefront, tune delivery details, and keep the menu ready for hungry people.
+          </p>
+        </div>
         <DetailsSection />
         <Separator />
         <CuisinesSection />
@@ -130,7 +139,11 @@ const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
         <MenuSection />
         <Separator />
         <ImageSection />
-        {isLoading ? <LoadingButton /> : <Button type="submit">Submit</Button>}
+        {isLoading ? <LoadingButton /> : (
+          <Button type="submit" className="h-12 rounded-full border-2 border-slate-950 bg-[#17201e] px-8 font-black text-amber-50 shadow-[3px_3px_0_#f05d3b] hover:bg-emerald-900">
+            Submit
+          </Button>
+        )}
       </form>
     </Form>
   )

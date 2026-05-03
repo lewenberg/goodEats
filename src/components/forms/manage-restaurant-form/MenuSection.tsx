@@ -17,8 +17,8 @@ const MenuSection = () => {
 
   return <div className="space-y-4">
     <div>
-        <h2 className="text-3xl font-bold">Menu</h2>
-        <FormDescription className="text-xl">
+        <h2 className="font-display text-4xl font-black">Menu</h2>
+        <FormDescription className="text-base font-semibold">
             Create your menu and give each item a name and a price
         </FormDescription>
     </div>
@@ -32,6 +32,7 @@ const MenuSection = () => {
         </FormItem>
     )}/>
     <Button type="button"
+    className="rounded-full border-2 border-slate-950 bg-[#17201e] font-black text-amber-50 shadow-[3px_3px_0_#f05d3b] hover:bg-emerald-900"
     onClick={()=> append({name: "", price: ""})}>
         Add Menu Item
     </Button>

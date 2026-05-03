@@ -9,31 +9,32 @@ type Props = {
 
 const SearchResultCard = ({ restaurant }: Props) => {
     return (
-        <Link to={`/detail/$restauratn._id`}
-            className="grid lg:grid-cols-[2fr_3fr] gap-5 group border-2 rounded-md p-4 border-primary">
+        <Link to={`/detail/${restaurant._id}`}
+            className="restaurant-panel-soft group grid gap-4 overflow-hidden rounded-[1.5rem] p-3 transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#17201e] md:grid-cols-[260px_1fr] lg:grid-cols-[320px_1fr]">
             <AspectRatio ratio={16 / 6}>
                 <img
                     src={restaurant.imageUrl}
-                    className="rounded-md w-full h-full object-cover"
-                    alt="" />
+                    className="h-full w-full rounded-[1.15rem] border-2 border-slate-950 object-cover"
+                    alt={restaurant.restaurantName} />
             </AspectRatio>
-            <div><h3 className="text-2xl font-bold tracking-tight mb-2 group-hover:underline">{restaurant.restaurantName}</h3>
-                <div id="card-content" className="grid md:grid-cols-2 gap-2">
-                    <div className="flex flex-row flex-wrap">
+            <div className="flex min-w-0 flex-col justify-between gap-4 p-1">
+                <h3 className="font-display text-4xl font-black leading-none tracking-normal group-hover:text-[#f05d3b]">{restaurant.restaurantName}</h3>
+                <div id="card-content" className="grid gap-3 md:grid-cols-[1fr_auto]">
+                    <div className="flex flex-row flex-wrap text-sm font-bold text-slate-600">
                         {restaurant.cuisines.map((item, index) => (
-                            <span className="flex">
+                            <span className="flex" key={`${restaurant._id}-${item}`}>
                                 <span>{item}</span>
                                 {index < restaurant.cuisines.length - 1 && <Dot />}
                             </span>
                         ))}
                     </div>
-                    <div className="flex gap-2 flex-col">
-                        <div className="flex items-center gpa-1 text-green-600">
-                            <Clock className="text-green-600"/> 
+                    <div className="flex flex-wrap gap-2 md:flex-col">
+                        <div className="inline-flex items-center rounded-full border-2 border-slate-950 bg-[#f6c54e] px-3 py-2 text-sm font-black text-slate-950">
+                            <Clock className="h-4 w-4 text-slate-950"/> 
                             &nbsp;{restaurant.estimatedDeliveryTime} mins
                         </div>
-                        <div className="flex items-center gap-1">
-                            <Banknote />
+                        <div className="inline-flex items-center gap-1 rounded-full border-2 border-slate-950 bg-white px-3 py-2 text-sm font-black">
+                            <Banknote className="h-4 w-4" />
                             Delivery from ₹{restaurant.deliveryPrice.toFixed(2)}
                         </div>
                     </div>

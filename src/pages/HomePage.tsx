@@ -610,25 +610,25 @@ const ManagementExperience = ({
   orders: Order[];
   updateOrderStatus: (orderId: string, status: string) => void;
 }) => (
-  <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+  <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_440px]">
     <section className="space-y-5">
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
         {restaurants.map((restaurant) => (
-          <div key={restaurant._id} className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-            <img src={restaurant.imageUrl} className="h-40 w-full object-cover" alt={restaurant.restaurantName} />
+          <div key={restaurant._id} className="restaurant-panel-soft overflow-hidden rounded-[1.5rem]">
+            <img src={restaurant.imageUrl} className="h-44 w-full border-b-2 border-slate-950 object-cover" alt={restaurant.restaurantName} />
             <div className="space-y-3 p-4">
               <div>
-                <h3 className="text-xl font-black">{restaurant.restaurantName}</h3>
-                <p className="text-sm text-slate-500">{restaurant.city} • {restaurant.cuisines.join(", ")}</p>
+                <h3 className="font-display text-3xl font-black leading-none">{restaurant.restaurantName}</h3>
+                <p className="mt-2 text-sm font-semibold text-slate-500">{restaurant.city} / {restaurant.cuisines.join(", ")}</p>
               </div>
               <div className="flex flex-wrap gap-2 text-xs font-bold uppercase text-slate-500">
-                <span className="rounded bg-slate-100 px-2 py-1">{restaurant.menuItems.length} menu items</span>
-                <span className="rounded bg-slate-100 px-2 py-1">{restaurant.ownerId || "admin-owned"}</span>
+                <span className="rounded-full border border-slate-950 bg-[#f6c54e] px-2 py-1 text-slate-950">{restaurant.menuItems.length} menu items</span>
+                <span className="rounded-full border border-slate-950 bg-white px-2 py-1 text-slate-950">{restaurant.ownerId || "admin-owned"}</span>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => editRestaurant(restaurant)}>Edit</Button>
+                <Button variant="outline" className="rounded-full border-2 border-slate-950 bg-white font-black" onClick={() => editRestaurant(restaurant)}>Edit</Button>
                 {role === "admin" ? (
-                  <Button variant="destructive" onClick={() => deleteRestaurant(restaurant._id)}><Trash2 />Remove</Button>
+                  <Button variant="destructive" className="rounded-full border-2 border-slate-950 font-black" onClick={() => deleteRestaurant(restaurant._id)}><Trash2 />Remove</Button>
                 ) : null}
               </div>
             </div>
@@ -637,13 +637,13 @@ const ManagementExperience = ({
       </div>
       <OrderList orders={orders} onStatus={updateOrderStatus} />
       {role === "admin" ? (
-        <div className="rounded-md border border-slate-200 bg-white p-4">
-          <h2 className="text-xl font-black">Users</h2>
+        <div className="restaurant-panel-soft rounded-[1.5rem] p-4">
+          <h2 className="font-display text-3xl font-black">Users</h2>
           <div className="mt-3 grid gap-2 md:grid-cols-2">
             {users.map((managedUser) => (
-              <div key={managedUser.userId} className="rounded bg-slate-50 p-3">
+              <div key={managedUser.userId} className="rounded-2xl border-2 border-slate-950 bg-white p-3">
                 <p className="font-bold">{managedUser.name}</p>
-                <p className="text-sm text-slate-500">{managedUser.email} • {managedUser.role}</p>
+                <p className="text-sm text-slate-500">{managedUser.email} / {managedUser.role}</p>
               </div>
             ))}
           </div>
@@ -651,9 +651,9 @@ const ManagementExperience = ({
       ) : null}
     </section>
 
-    <form onSubmit={saveRestaurant} className="h-fit space-y-4 rounded-md border border-slate-200 bg-white p-5 shadow-sm">
+    <form onSubmit={saveRestaurant} className="restaurant-panel h-fit space-y-4 rounded-[1.5rem] p-4 sm:p-5 xl:sticky xl:top-24">
       <div>
-        <h2 className="text-2xl font-black">{restaurantForm._id ? "Edit restaurant" : "Add restaurant"}</h2>
+        <h2 className="font-display text-4xl font-black leading-none">{restaurantForm._id ? "Edit restaurant" : "Add restaurant"}</h2>
         {role === "owner" ? <p className="mt-1 text-sm text-slate-500">Owners can change menu details, but the restaurant name stays locked.</p> : null}
       </div>
 
@@ -681,7 +681,7 @@ const ManagementExperience = ({
       {role === "admin" ? (
         <Field label="Owner">
           <select
-            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="h-11 w-full rounded-full border-2 border-slate-950 bg-white px-3 text-sm font-bold"
             value={restaurantForm.ownerId || ""}
             onChange={(event) => setRestaurantForm((current) => ({ ...current, ownerId: event.target.value || null }))}
           >
@@ -705,46 +705,46 @@ const ManagementExperience = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-black">Menu</h3>
-          <Button type="button" variant="outline" onClick={addMenuItem}><Plus />Item</Button>
+          <Button type="button" variant="outline" className="rounded-full border-2 border-slate-950 bg-white font-black" onClick={addMenuItem}><Plus />Item</Button>
         </div>
         {(restaurantForm.menuItems || []).map((item, index) => (
-          <div key={item._id} className="space-y-2 rounded-md bg-slate-50 p-3">
+          <div key={item._id} className="space-y-2 rounded-2xl border-2 border-slate-950 bg-white p-3">
             <Input value={item.name} onChange={(event) => updateMenuItem(index, { name: event.target.value })} />
             <Input value={item.description || ""} onChange={(event) => updateMenuItem(index, { description: event.target.value })} />
             <div className="flex gap-2">
               <Input type="number" value={item.price} onChange={(event) => updateMenuItem(index, { price: Number(event.target.value) })} />
-              <Button type="button" variant="outline" size="icon" onClick={() => removeMenuItem(index)}><Trash2 /></Button>
+              <Button type="button" variant="outline" size="icon" className="rounded-full border-2 border-slate-950" onClick={() => removeMenuItem(index)}><Trash2 /></Button>
             </div>
           </div>
         ))}
       </div>
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Save changes"}</Button>
-        {role === "admin" ? <Button type="button" variant="outline" onClick={() => setRestaurantForm(blankRestaurant())}>New</Button> : null}
+        <Button type="submit" disabled={isSaving} className="rounded-full border-2 border-slate-950 bg-[#17201e] font-black text-amber-50 shadow-[3px_3px_0_#f05d3b]">{isSaving ? "Saving..." : "Save changes"}</Button>
+        {role === "admin" ? <Button type="button" variant="outline" className="rounded-full border-2 border-slate-950 bg-white font-black" onClick={() => setRestaurantForm(blankRestaurant())}>New</Button> : null}
       </div>
     </form>
   </div>
 );
 
 const Metric = ({ icon: Icon, label, value }: { icon: typeof Store; label: string; value: number }) => (
-  <div className="rounded-md bg-white/10 p-4">
-    <Icon className="mb-3 h-5 w-5 text-emerald-300" />
-    <p className="text-3xl font-black">{value}</p>
-    <p className="text-sm font-semibold text-slate-300">{label}</p>
+  <div className="rounded-[1.25rem] border-2 border-amber-50/40 bg-amber-50/10 p-4 backdrop-blur">
+    <Icon className="mb-3 h-5 w-5 text-[#f6c54e]" />
+    <p className="font-display text-4xl font-black">{value}</p>
+    <p className="text-sm font-semibold text-amber-50/70">{label}</p>
   </div>
 );
 
 const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="space-y-2">
-    <Label>{label}</Label>
+    <Label className="text-xs font-black uppercase text-slate-600">{label}</Label>
     {children}
   </div>
 );
 
 const Step = ({ label, title }: { label: string; title: string }) => (
-  <div className="rounded bg-white/10 p-3">
-    <p className="font-black text-emerald-300">{label}</p>
+  <div className="rounded-2xl border-2 border-amber-50/30 bg-amber-50/10 p-3 backdrop-blur">
+    <p className="font-black text-[#f6c54e]">{label}</p>
     <p className="font-semibold">{title}</p>
   </div>
 );
@@ -757,22 +757,22 @@ const PriceRow = ({ label, value, strong = false }: { label: string; value: numb
 );
 
 const EmptyState = ({ title }: { title: string }) => (
-  <div className="rounded-md border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">{title}</div>
+  <div className="restaurant-panel-soft rounded-[1.5rem] border-dashed p-8 text-center font-bold text-slate-500">{title}</div>
 );
 
 const OrderList = ({ orders, onStatus }: { orders: Order[]; onStatus?: (id: string, status: string) => void }) => (
-  <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-    <h2 className="flex items-center gap-2 text-xl font-black"><ReceiptText className="h-5 w-5 text-emerald-700" />Orders</h2>
+  <div className="restaurant-panel-soft rounded-[1.5rem] p-4">
+    <h2 className="font-display flex items-center gap-2 text-3xl font-black"><ReceiptText className="h-5 w-5 text-[#f05d3b]" />Orders</h2>
     <div className="mt-4 space-y-3">
       {orders.length === 0 ? (
         <p className="text-sm text-slate-500">No orders yet.</p>
       ) : (
         orders.map((order) => (
-          <div key={order._id} className="rounded-md bg-slate-50 p-3">
+          <div key={order._id} className="rounded-2xl border-2 border-slate-950 bg-white p-3">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-black">{order.restaurantName}</p>
-                <p className="text-sm text-slate-500">{order.orderId} • {order.status}</p>
+                <p className="text-sm text-slate-500">{order.orderId} / {order.status}</p>
               </div>
               <p className="font-black">{money(order.total)}</p>
             </div>
@@ -780,9 +780,9 @@ const OrderList = ({ orders, onStatus }: { orders: Order[]; onStatus?: (id: stri
               {order.items.map((item) => `${item.quantity}x ${item.name}`).join(", ")}
             </p>
             {onStatus ? (
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {["Preparing", "Out for delivery", "Delivered"].map((status) => (
-                  <Button key={status} variant="outline" size="sm" onClick={() => onStatus(order._id, status)}>{status}</Button>
+                  <Button key={status} variant="outline" size="sm" className="rounded-full border-2 border-slate-950 bg-card font-black" onClick={() => onStatus(order._id, status)}>{status}</Button>
                 ))}
               </div>
             ) : null}

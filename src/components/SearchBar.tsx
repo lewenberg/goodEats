@@ -47,11 +47,11 @@ const SearchBar = ({ onSubmit, onReset, placeHolder, searchQuery }: Props) => {
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className={`flex items-center gap-3 justify-between flex-row border-2 rounded-full p-2 mx-5 mt-2 
+                className={`restaurant-panel-soft flex flex-col items-stretch justify-between gap-3 rounded-[1.5rem] p-3 sm:flex-row sm:items-center 
                 ${form.formState.errors.searchQuery && "border-red-500"}`}>
                 <Search
                     strokeWidth={2.5}
-                    className="ml-1 text-secondary hidden md:block"
+                    className="ml-1 hidden text-[#f05d3b] md:block"
                 />
                 <FormField
                     control={form.control}
@@ -61,7 +61,7 @@ const SearchBar = ({ onSubmit, onReset, placeHolder, searchQuery }: Props) => {
                             <FormControl>
                                 <Input
                                     {...field}
-                                    className="border-none shadow-none text-xl focus-visible:ring-0"
+                                    className="h-12 rounded-full border-2 border-slate-950 bg-white px-4 text-base font-bold shadow-none focus-visible:ring-0 sm:text-lg"
                                     placeholder={placeHolder} />
                             </FormControl>
                         </FormItem>)}
@@ -69,13 +69,13 @@ const SearchBar = ({ onSubmit, onReset, placeHolder, searchQuery }: Props) => {
                 <Button
                     onClick={handleReset}
                     type="button"
-                    className="rounded-full  bg-secondary text-primary hover:text-secondary">
+                    className="rounded-full border-2 border-slate-950 bg-white font-black text-slate-950 hover:bg-amber-50">
                     Reset
                 </Button>
 
                 <Button
                     type="submit"
-                    className="rounded-full bg-secondary text-primary hover:text-secondary">
+                    className="rounded-full border-2 border-slate-950 bg-[#17201e] font-black text-amber-50 shadow-[3px_3px_0_#f05d3b] hover:bg-emerald-900">
                     Search
                 </Button>
             </form>

@@ -9,17 +9,17 @@ const ImageSection = () => {
     return (
         <div className="space-y-4">
             <div>
-                <h2 className="text-3xl font-bold">Image</h2>
-                <FormDescription className="text-xl">
-                    Add a image will be displayed on your restaurant listing in the search results. Adding a new iamge will overwrite the existing one.
+                <h2 className="font-display text-4xl font-black">Image</h2>
+                <FormDescription className="max-w-3xl text-base font-semibold">
+                    Add an image for your restaurant listing. Uploading a new image will replace the existing one.
                 </FormDescription>
             </div>
-            <div className="flex flex-col gap-8 md:w-[50%]">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.65fr)_minmax(260px,0.35fr)]">
         {existingImageUrl && (
           <AspectRatio ratio={16 / 9}>
             <img
               src={existingImageUrl}
-              className="rounded-md object-cover h-full w-full"
+              className="h-full w-full rounded-[1.5rem] border-2 border-slate-950 object-cover shadow-[5px_5px_0_#17201e]"
             />
           </AspectRatio>
         )}
@@ -30,7 +30,7 @@ const ImageSection = () => {
             <FormItem>
               <FormControl>
                 <Input
-                  className="border-primary"
+                  className="h-12 rounded-full border-2 border-slate-950 bg-white font-bold file:mr-4 file:rounded-full file:border-0 file:bg-[#f6c54e] file:px-4 file:py-2 file:font-black"
                   type="file"
                   accept=".jpg, .jpeg, .png"
                   onChange={(event) =>

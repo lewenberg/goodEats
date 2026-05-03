@@ -75,8 +75,8 @@ const SearchPage = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-5 m-4">
-      <div id="cuisines-list" >
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[280px_1fr]">
+      <div id="cuisines-list" className="restaurant-panel-soft h-fit rounded-[1.5rem] p-4 lg:sticky lg:top-24">
         <CuisineFilter
           selectedCuisines={searchState.selectedCuisines}
           onChange={setSelectedCuisines}
@@ -88,6 +88,10 @@ const SearchPage = () => {
       </div>
 
       <div id="main-content" className="flex flex-col gap-5">
+        <div className="restaurant-panel overflow-hidden rounded-[2rem] bg-[#17201e] p-5 text-amber-50 sm:p-7">
+          <p className="text-xs font-black uppercase text-[#f6c54e]">Browse kitchens</p>
+          <h1 className="font-display mt-2 text-5xl font-black leading-none sm:text-7xl">{city}</h1>
+        </div>
         <SearchBar
           searchQuery={searchState.searchQuery}
           onSubmit={setSearchQuery}
@@ -95,7 +99,7 @@ const SearchPage = () => {
           onReset={resetSearch}
         />
 
-        <div className="flex justify-between flex-col gap-3 lg:flex-row">
+        <div className="restaurant-panel-soft flex flex-col justify-between gap-3 rounded-[1.5rem] p-4 lg:flex-row lg:items-center">
           <SearchResultInfo total={results.pagination.total} city={city} />
 
           <SortOptionDropDown
@@ -118,4 +122,3 @@ const SearchPage = () => {
 }
 
 export default SearchPage;
-

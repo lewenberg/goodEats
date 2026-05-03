@@ -6,19 +6,19 @@ import CuisineCheckBox from "./CuisineCheckBox";
 const CuisinesSection = () => {
   const {control} = useFormContext();
   return(
-    <div className="space-y-2">
+    <div className="space-y-4">
         <div>
-            <h2 className="text-3xl font-bold">Cuisines</h2>
-            <FormDescription className="text-xl">
+            <h2 className="font-display text-4xl font-black">Cuisines</h2>
+            <FormDescription className="text-base font-semibold">
                 Select the cuisines that your restaurant serves
             </FormDescription>
         </div>
         <FormField control={control} name="cuisines"
         render={({field})=>(
             <FormItem>
-                <div className="flex flex-wrap  gap-4">
+                <div className="flex flex-wrap gap-3">
                     {cuisineList.map((cuisineItem)=> (
-                        <CuisineCheckBox cuisine={cuisineItem} field={field} />
+                        <CuisineCheckBox key={cuisineItem} cuisine={cuisineItem} field={field} />
                     ))}
                 </div>
                 <FormMessage/>
