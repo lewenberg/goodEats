@@ -1,0 +1,110 @@
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/archivo";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 39 52% 94%;
+    --foreground: 210 28% 10%;
+    --card: 41 48% 98%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 41 48% 98%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 160 58% 24%;
+    --primary-foreground: 40 58% 96%;
+    --secondary: 35 46% 86%;
+    --secondary-foreground: 210 28% 10%;
+    --muted: 37 35% 88%;
+    --muted-foreground: 212 10% 35%;
+    --accent: 9 83% 58%;
+    --accent-foreground: 40 58% 96%;
+    --destructive: 354 72% 44%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 210 18% 17%;
+    --input: 210 18% 17%;
+    --ring: 160 58% 24%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+    background-image:
+      linear-gradient(rgba(22, 34, 32, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(22, 34, 32, 0.055) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: "Newsreader Variable", Georgia, serif;
+    letter-spacing: 0;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    letter-spacing: 0;
+  }
+}
+
+@layer utilities {
+  .restaurant-panel {
+    @apply border-2 border-slate-950 bg-card shadow-[6px_6px_0_#17201e];
+  }
+
+  .restaurant-panel-soft {
+    @apply border-2 border-slate-950 bg-card shadow-[3px_3px_0_#17201e];
+  }
+
+  .ink-pill {
+    @apply inline-flex items-center gap-2 rounded-full border-2 border-slate-950 bg-card px-3 py-1 text-xs font-black uppercase text-slate-900;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #17201e transparent;
+  }
+}

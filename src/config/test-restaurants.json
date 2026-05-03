@@ -1,0 +1,738 @@
+[
+    {
+      "user": "User1",
+      "restaurantName": "Restaurant 1",
+      "city": "Durg",
+      "country": "India",
+      "deliveryPrice": 150,
+      "estimatedDeliveryTime": 30,
+      "cuisines": [
+        "North Indian",
+        "Punjabi",
+        "BBQ",
+        "Tacos"
+      ],
+      "menuItems": [
+        {
+          "name": "Paneer Butter Masala",
+          "price": 350,
+          "_id": {
+            "$oid": "879d1aa0cb2bb18d49c9fe89"
+          }
+        },
+        {
+          "name": "Dal Makhani",
+          "price": 250,
+          "_id": {
+            "$oid": "1fbfd7a6d60f277cd446b3ee"
+          }
+        },
+        {
+          "name": "Tandoori Chicken",
+          "price": 450,
+          "_id": {
+            "$oid": "f2edf1ff6bcad0fcf0ba60b6"
+          }
+        },
+        {
+          "name": "Naan",
+          "price": 100,
+          "_id": {
+            "$oid": "49fb3fcbea0cdedbe252b2bf"
+          }
+        },
+        {
+          "name": "Biryani",
+          "price": 400,
+          "_id": {
+            "$oid": "cffecdfa4cad4b7ea5ecee24"
+          }
+        }
+      ],
+      "imageUrl": "https://placehold.co/1600x400",
+      "lastUpdated": "2024-02-01T18:03:56.681036"
+    },
+    {
+      "user": "User2",
+      "restaurantName": "Restaurant 2",
+      "city": "Chennai",
+      "country": "India",
+      "deliveryPrice": 120,
+      "estimatedDeliveryTime": 25,
+      "cuisines": [
+        "South Indian",
+        "Indian",
+        "Chinese",
+        "Desserts"
+      ],
+      "menuItems": [
+        {
+          "name": "Idli",
+          "price": 80,
+          "_id": {
+            "$oid": "4295fee37d3d3ca58947ad70"
+          }
+        },
+        {
+          "name": "Sambar Rice",
+          "price": 200,
+          "_id": {
+            "$oid": "76df56310a6bc83b5aac72cd"
+          }
+        },
+        {
+          "name": "Veg Fried Rice",
+          "price": 220,
+          "_id": {
+            "$oid": "acb355acb08187ca9cb4854f"
+          }
+        },
+        {
+          "name": "Gulab Jamun",
+          "price": 100,
+          "_id": {
+            "$oid": "efb5e1ec036eb78ffb34fb3a"
+          }
+        },
+        {
+          "name": "Dosa",
+          "price": 150,
+          "_id": {
+            "$oid": "d7faa15791ffc37bfbafafbd"
+          }
+        }
+      ],
+      "imageUrl": "https://placehold.co/1600x400",
+      "lastUpdated": "2024-02-01T18:03:56.681073"
+    },
+    {
+      "user": "User3",
+      "restaurantName": "Restaurant 3",
+      "city": "Hyderabad",
+      "country": "India",
+      "deliveryPrice": 200,
+      "estimatedDeliveryTime": 20,
+      "cuisines": [
+        "Hyderabadi",
+        "Indian",
+        "Bengali",
+        "Mediterranean"
+      ],
+      "menuItems": [
+        {
+          "name": "Hyderabadi Biryani",
+          "price": 600,
+          "_id": {
+            "$oid": "124f6faefafbfa2eb2ce7315"
+          }
+        },
+        {
+          "name": "Kebabs",
+          "price": 500,
+          "_id": {
+            "$oid": "0d5cd8aaeddd918cfee1e843"
+          }
+        },
+        {
+          "name": "Rogan Josh",
+          "price": 650,
+          "_id": {
+            "$oid": "b7419ff9fb4fde14be72ecc7"
+          }
+        },
+        {
+          "name": "Lassi",
+          "price": 150,
+          "_id": {
+            "$oid": "cbadc509aeffe531acecaaa0"
+          }
+        },
+        {
+          "name": "Gajar Halwa",
+          "price": 200,
+          "_id": {
+            "$oid": "df8c84b39c8d83f1fb35edcb"
+          }
+        }
+      ],
+      "imageUrl": "https://placehold.co/1600x400",
+      "lastUpdated": "2024-02-01T18:03:56.681100"
+    },
+    {
+        "user": "User4",
+        "restaurantName": "Restaurant 4",
+        "city": "Hyderabad",
+        "country": "India",
+        "deliveryPrice": 300,
+        "estimatedDeliveryTime": 25,
+        "cuisines": [
+          "North Indian",
+          "Chinese",
+          "Biryani",
+          "Cafe"
+        ],
+        "menuItems": [
+          {
+            "name": "Hyderabadi Biryani",
+            "price": 800,
+            "_id": {
+              "$oid": "f4b6ee7ddafe5b9aeacd52de"
+            }
+          },
+          {
+            "name": "Paneer Butter Masala",
+            "price": 600,
+            "_id": {
+              "$oid": "e6a7d2943d3bc188f04d9bf7"
+            }
+          },
+          {
+            "name": "Chili Chicken",
+            "price": 500,
+            "_id": {
+              "$oid": "db68f5c3df3cbd2225baacec"
+            }
+          },
+          {
+            "name": "Butter Naan",
+            "price": 150,
+            "_id": {
+              "$oid": "7535e8acc3267a6b45522106"
+            }
+          },
+          {
+            "name": "Fruit Salad",
+            "price": 300,
+            "_id": {
+              "$oid": "656e7f5bcc039e5c7c23fb35"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681128"
+      },
+      {
+        "user": "User5",
+        "restaurantName": "Restaurant 5",
+        "city": "Chennai",
+        "country": "India",
+        "deliveryPrice": 150,
+        "estimatedDeliveryTime": 40,
+        "cuisines": [
+          "South Indian",
+          "Healthy",
+          "Vegan",
+          "Salads"
+        ],
+        "menuItems": [
+          {
+            "name": "Idli",
+            "price": 80,
+            "_id": {
+              "$oid": "ebcdefdb1eb6d7ef3f1e5133"
+            }
+          },
+          {
+            "name": "Sambar Rice",
+            "price": 200,
+            "_id": {
+              "$oid": "bd37dbf940f5cdd8575c0937"
+            }
+          },
+          {
+            "name": "Vegetable Salad",
+            "price": 150,
+            "_id": {
+              "$oid": "6fdd8ae008feb0a8c898eca7"
+            }
+          },
+          {
+            "name": "Curd Rice",
+            "price": 100,
+            "_id": {
+              "$oid": "f5d29a8e9b8a9c8f660de7dd"
+            }
+          },
+          {
+            "name": "Fresh Juice",
+            "price": 250,
+            "_id": {
+              "$oid": "f29214e042de698df5ccffe7"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681154"
+      },
+      {
+        "user": "User6",
+        "restaurantName": "Restaurant 6",
+        "city": "Durg",
+        "country": "India",
+        "deliveryPrice": 150,
+        "estimatedDeliveryTime": 30,
+        "cuisines": [
+          "North Indian",
+          "Punjabi",
+          "Bengali",
+          "Desserts"
+        ],
+        "menuItems": [
+          {
+            "name": "Chicken Biryani",
+            "price": 600,
+            "_id": {
+              "$oid": "d69b7d4138fbdc8afa7e34ae"
+            }
+          },
+          {
+            "name": "Chole Bhature",
+            "price": 250,
+            "_id": {
+              "$oid": "fb7ff58aa722eeb078dbaeeb"
+            }
+          },
+          {
+            "name": "Gulab Jamun",
+            "price": 150,
+            "_id": {
+              "$oid": "f3fe5afafbdfcbfe9f6bd955"
+            }
+          },
+          {
+            "name": "Paneer Tikka",
+            "price": 350,
+            "_id": {
+              "$oid": "09dcc40caf99daf2be94dead"
+            }
+          },
+          {
+            "name": "Samosa",
+            "price": 50,
+            "_id": {
+              "$oid": "dadaa083b7b9dfd10c9beaab"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681180"
+      },
+      {
+        "user": "User7",
+        "restaurantName": "Restaurant 7",
+        "city": "Chennai",
+        "country": "India",
+        "deliveryPrice": 120,
+        "estimatedDeliveryTime": 25,
+        "cuisines": [
+          "South Indian",
+          "Indian",
+          "Chinese",
+          "Desserts"
+        ],
+        "menuItems": [
+          {
+            "name": "Masala Dosa",
+            "price": 100,
+            "_id": {
+              "$oid": "f10fdf0d0df2b0cbf33c3b14"
+            }
+          },
+          {
+            "name": "Idli",
+            "price": 80,
+            "_id": {
+              "$oid": "c715bcbfefecb06bbd91b7da"
+            }
+          },
+          {
+            "name": "Vegetable Fried Rice",
+            "price": 220,
+            "_id": {
+              "$oid": "792d91bae47ff9f9c3c16a1a"
+            }
+          },
+          {
+            "name": "Gulab Jamun",
+            "price": 100,
+            "_id": {
+              "$oid": "99f6cf432b81f7ffa415b3ba"
+            }
+          },
+          {
+            "name": "Rasam Rice",
+            "price": 150,
+            "_id": {
+              "$oid": "a42ba7082eedac86f531c3fb"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681205"
+      },
+      {
+        "user": "User1",
+        "restaurantName": "Spice Junction",
+        "city": "Durg",
+        "country": "India",
+        "deliveryPrice": 250,
+        "estimatedDeliveryTime": 30,
+        "cuisines": [
+          "North Indian",
+          "South Indian",
+          "Biryani"
+        ],
+        "menuItems": [
+          {
+            "name": "Paneer Tikka",
+            "price": 350,
+            "_id": {
+              "$oid": "f1a6ee7ddafe5b9aeacd52de"
+            }
+          },
+          {
+            "name": "Chicken Biryani",
+            "price": 550,
+            "_id": {
+              "$oid": "f1a7d2943d3bc188f04d9bf7"
+            }
+          },
+          {
+            "name": "Daal Makhani",
+            "price": 400,
+            "_id": {
+              "$oid": "f1a8f5c3df3cbd2225baacec"
+            }
+          },
+          {
+            "name": "Naan",
+            "price": 100,
+            "_id": {
+              "$oid": "f1a9e8acc3267a6b45522106"
+            }
+          },
+          {
+            "name": "Raita",
+            "price": 120,
+            "_id": {
+              "$oid": "f1aa7f5bcc039e5c7c23fb35"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681180"
+      },
+      {
+        "user": "User2",
+        "restaurantName": "Chaat Corner",
+        "city": "Chennai",
+        "country": "India",
+        "deliveryPrice": 150,
+        "estimatedDeliveryTime": 25,
+        "cuisines": [
+          "Street Food",
+          "North Indian",
+          "Vegan"
+        ],
+        "menuItems": [
+          {
+            "name": "Pani Puri",
+            "price": 100,
+            "_id": {
+              "$oid": "f2b6ee7ddafe5b9aeacd52de"
+            }
+          },
+          {
+            "name": "Aloo Tikki",
+            "price": 80,
+            "_id": {
+              "$oid": "f2b7d2943d3bc188f04d9bf7"
+            }
+          },
+          {
+            "name": "Pav Bhaji",
+            "price": 150,
+            "_id": {
+              "$oid": "f2b8f5c3df3cbd2225baacec"
+            }
+          },
+          {
+            "name": "Samosa",
+            "price": 60,
+            "_id": {
+              "$oid": "f2b9e8acc3267a6b45522106"
+            }
+          },
+          {
+            "name": "Chole Bhature",
+            "price": 200,
+            "_id": {
+              "$oid": "f2ba7f5bcc039e5c7c23fb35"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681180"
+      },
+      {
+        "user": "User3",
+        "restaurantName": "Tandoori Nights",
+        "city": "Hyderabad",
+        "country": "India",
+        "deliveryPrice": 300,
+        "estimatedDeliveryTime": 35,
+        "cuisines": [
+          "North Indian",
+          "Mughlai",
+          "Tandoori"
+        ],
+        "menuItems": [
+          {
+            "name": "Tandoori Chicken",
+            "price": 700,
+            "_id": {
+              "$oid": "f3c6ee7ddafe5b9aeacd52de"
+            }
+          },
+          {
+            "name": "Butter Chicken",
+            "price": 600,
+            "_id": {
+              "$oid": "f3c7d2943d3bc188f04d9bf7"
+            }
+          },
+          {
+            "name": "Roti",
+            "price": 40,
+            "_id": {
+              "$oid": "f3c8f5c3df3cbd2225baacec"
+            }
+          },
+          {
+            "name": "Chicken Korma",
+            "price": 650,
+            "_id": {
+              "$oid": "f3c9e8acc3267a6b45522106"
+            }
+          },
+          {
+            "name": "Mutton Seekh Kebab",
+            "price": 800,
+            "_id": {
+              "$oid": "f3ca7f5bcc039e5c7c23fb35"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681180"
+      },
+      {
+        "user": "User4",
+        "restaurantName": "South Indian Delights",
+        "city": "Durg",
+        "country": "India",
+        "deliveryPrice": 200,
+        "estimatedDeliveryTime": 30,
+        "cuisines": [
+          "South Indian",
+          "Healthy",
+          "Vegetarian"
+        ],
+        "menuItems": [
+          {
+            "name": "Masala Dosa",
+            "price": 120,
+            "_id": {
+              "$oid": "f4c6ee7ddafe5b9aeacd52de"
+            }
+          },
+          {
+            "name": "Sambar",
+            "price": 60,
+            "_id": {
+              "$oid": "f4c7d2943d3bc188f04d9bf7"
+            }
+          },
+          {
+            "name": "Rasam",
+            "price": 70,
+            "_id": {
+              "$oid": "f4c8f5c3df3cbd2225baacec"
+            }
+          },
+          {
+            "name": "Curd Rice",
+            "price": 80,
+            "_id": {
+              "$oid": "f4c9e8acc3267a6b45522106"
+            }
+          },
+          {
+            "name": "Vegetable Uthappam",
+            "price": 150,
+            "_id": {
+              "$oid": "f4ca7f5bcc039e5c7c23fb35"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681180"
+      },
+      {
+        "user": "User5",
+        "restaurantName": "Biryani House",
+        "city": "Chennai",
+        "country": "India",
+        "deliveryPrice": 300,
+        "estimatedDeliveryTime": 40,
+        "cuisines": [
+          "Hyderabadi",
+          "North Indian",
+          "Tandoori"
+        ],
+        "menuItems": [
+          {
+            "name": "Hyderabadi Dum Biryani",
+            "price": 650,
+            "_id": {
+              "$oid": "f5d6ee7ddafe5b9aeacd52de"
+            }
+          },
+          {
+            "name": "Mutton Biryani",
+            "price": 750,
+            "_id": {
+              "$oid": "f5d7d2943d3bc188f04d9bf7"
+            }
+          },
+          {
+            "name": "Egg Biryani",
+            "price": 600,
+            "_id": {
+              "$oid": "f5d8f5c3df3cbd2225baacec"
+            }
+          },
+          {
+            "name": "Paneer Biryani",
+            "price": 500,
+            "_id": {
+              "$oid": "f5d9e8acc3267a6b45522106"
+            }
+          },
+          {
+            "name": "Onion Raita",
+            "price": 120,
+            "_id": {
+              "$oid": "f5da7f5bcc039e5c7c23fb35"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681180"
+      },
+      {
+        "user": "User6",
+        "restaurantName": "Taste of India",
+        "city": "Hyderabad",
+        "country": "India",
+        "deliveryPrice": 350,
+        "estimatedDeliveryTime": 45,
+        "cuisines": [
+          "Indian",
+          "Punjabi",
+          "Mughlai"
+        ],
+        "menuItems": [
+          {
+            "name": "Butter Chicken",
+            "price": 650,
+            "_id": {
+              "$oid": "f6e6ee7ddafe5b9aeacd52de"
+            }
+          },
+          {
+            "name": "Paneer Butter Masala",
+            "price": 550,
+            "_id": {
+              "$oid": "f6e7d2943d3bc188f04d9bf7"
+            }
+          },
+          {
+            "name": "Biryani",
+            "price": 700,
+            "_id": {
+              "$oid": "f6e8f5c3df3cbd2225baacec"
+            }
+          },
+          {
+            "name": "Naan",
+            "price": 50,
+            "_id": {
+              "$oid": "f6e9e8acc3267a6b45522106"
+            }
+          },
+          {
+            "name": "Dal Tadka",
+            "price": 300,
+            "_id": {
+              "$oid": "f6ea7f5bcc039e5c7c23fb35"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681180"
+      },
+      {
+        "user": "User7",
+        "restaurantName": "Sweet Tooth",
+        "city": "Mumbai",
+        "country": "India",
+        "deliveryPrice": 200,
+        "estimatedDeliveryTime": 20,
+        "cuisines": [
+          "Desserts",
+          "Bakery",
+          "Cafe"
+        ],
+        "menuItems": [
+          {
+            "name": "Chocolate Cake",
+            "price": 450,
+            "_id": {
+              "$oid": "f7c6ee7ddafe5b9aeacd52de"
+            }
+          },
+          {
+            "name": "Cheesecake",
+            "price": 500,
+            "_id": {
+              "$oid": "f7c7d2943d3bc188f04d9bf7"
+            }
+          },
+          {
+            "name": "Pasta Primavera",
+            "price": 400,
+            "_id": {
+              "$oid": "f7c8f5c3df3cbd2225baacec"
+            }
+          },
+          {
+            "name": "Fruit Tart",
+            "price": 350,
+            "_id": {
+              "$oid": "f7c9e8acc3267a6b45522106"
+            }
+          },
+          {
+            "name": "Iced Coffee",
+            "price": 150,
+            "_id": {
+              "$oid": "f7ca7f5bcc039e5c7c23fb35"
+            }
+          }
+        ],
+        "imageUrl": "https://placehold.co/1600x400",
+        "lastUpdated": "2024-02-01T18:03:56.681180"
+      }
+  ]
+  
